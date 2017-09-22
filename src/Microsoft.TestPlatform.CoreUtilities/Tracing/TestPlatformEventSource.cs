@@ -223,5 +223,19 @@ namespace Microsoft.VisualStudio.TestPlatform.CoreUtilities.Tracing
         {
             this.WriteEvent(TestPlatformInstrumentationEvents.TranslationLayerExecutionStopEventId);
         }
+
+        /// <inheritdoc/>
+        [Event(TestPlatformInstrumentationEvents.MetricsPublisherStartEventId)]
+        public void MetricsPublisherStart()
+        {
+            this.WriteEvent(TestPlatformInstrumentationEvents.MetricsPublisherStartEventId);
+        }
+
+        /// <inheritdoc/>
+        [Event(TestPlatformInstrumentationEvents.MetricsPublisherStopEventId)]
+        public void MetricsPublisherStop()
+        {
+            this.WriteEvent(TestPlatformInstrumentationEvents.MetricsPublisherStopEventId);
+        }
     }
 }

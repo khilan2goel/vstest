@@ -8,6 +8,7 @@ namespace Microsoft.VisualStudio.TestPlatform.CommandLine.TestPlatformHelpers
     using System.IO;
     using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
     using System.Xml;
 
     using Microsoft.VisualStudio.TestPlatform.Client;
@@ -144,8 +145,7 @@ namespace Microsoft.VisualStudio.TestPlatform.CommandLine.TestPlatformHelpers
 
             var runsettings = discoveryPayload.RunSettings;
             var requestData = this.GetRequestData(protocolConfig);
-            var metricsPublisher = this.telemetryOptedIn ? (IMetricsPublisher)new MetricsPublisher() : new NoOpMetricsPublisher();
-
+            var metricsPublisher = this.telemetryOptedIn ? Task.Run<IMetricsPublisher>(() => new MetricsPublisher()) : Task.Run<IMetricsPublisher>(() => new NoOpMetricsPublisher());
             if (this.UpdateRunSettingsIfRequired(runsettings, out string updatedRunsettings))
             {
                 runsettings = updatedRunsettings;
@@ -195,9 +195,13 @@ namespace Microsoft.VisualStudio.TestPlatform.CommandLine.TestPlatformHelpers
             EqtTrace.Info("TestRequestManager.DiscoverTests: Discovery tests completed, successful: {0}.", success);
             this.testPlatformEventSource.DiscoveryRequestStop();
 
+            this.testPlatformEventSource.MetricsPublisherStart();
+
             // Publish the Metrics
-            metricsPublisher.PublishMetrics(TelemetryDataConstants.TestDiscoveryCompleteEvent, requestData.MetricsCollection.Metrics);
-            metricsPublisher.Dispose();
+            metricsPublisher.Result.PublishMetrics(TelemetryDataConstants.TestDiscoveryCompleteEvent, requestData.MetricsCollection.Metrics);
+            metricsPublisher.Result.Dispose();
+
+            this.testPlatformEventSource.MetricsPublisherStop();
 
             return success;
         }
@@ -220,8 +224,7 @@ namespace Microsoft.VisualStudio.TestPlatform.CommandLine.TestPlatformHelpers
             TestRunCriteria runCriteria = null;
             var runsettings = testRunRequestPayload.RunSettings;
             var requestData = this.GetRequestData(protocolConfig);
-            var metricsPublisher = this.telemetryOptedIn ? (IMetricsPublisher)new MetricsPublisher() : new NoOpMetricsPublisher();
-
+            var metricsPublisher = this.telemetryOptedIn ? Task.Run<IMetricsPublisher>(() => new MetricsPublisher()) : Task.Run<IMetricsPublisher>(() => new NoOpMetricsPublisher());
             if (this.UpdateRunSettingsIfRequired(runsettings, out string updatedRunsettings))
             {
                 runsettings = updatedRunsettings;
@@ -253,8 +256,12 @@ namespace Microsoft.VisualStudio.TestPlatform.CommandLine.TestPlatformHelpers
             EqtTrace.Info("TestRequestManager.RunTests: run tests completed, sucessful: {0}.", success);
             this.testPlatformEventSource.ExecutionRequestStop();
 
-            metricsPublisher.PublishMetrics(TelemetryDataConstants.TestExecutionCompleteEvent, requestData.MetricsCollection.Metrics);
-            metricsPublisher.Dispose();
+            this.testPlatformEventSource.MetricsPublisherStart();
+
+            metricsPublisher.Result.PublishMetrics(TelemetryDataConstants.TestExecutionCompleteEvent, requestData.MetricsCollection.Metrics);
+            metricsPublisher.Result.Dispose();
+
+            this.testPlatformEventSource.MetricsPublisherStop();
 
             return success;
         }

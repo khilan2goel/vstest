@@ -147,5 +147,15 @@ namespace Microsoft.VisualStudio.TestPlatform.CoreUtilities.Tracing
         /// Event fired on execution complete in translation layer.
         /// </summary>
         public const int TranslationLayerExecutionStopEventId = 0x37;
+
+        /// <summary>
+        /// Event fired on Metrics Publisher start.
+        /// </summary>
+        public const int MetricsPublisherStartEventId = 0x38;
+
+        /// <summary>
+        /// Event fired on Metrics Publisher completes.
+        /// </summary>
+        public const int MetricsPublisherStopEventId = 0x39;
     }
 }
